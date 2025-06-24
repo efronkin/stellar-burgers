@@ -8,7 +8,7 @@ import {
   selectOrderModalData,
   clearConstructor,
   setOrderModalData,
-  sendOrderThunk
+  sendOrder
 } from '../../services/features/burgerConstructorSlice';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -39,7 +39,7 @@ export const BurgerConstructor: FC = () => {
     const ingredientIds = constructorItems.ingredients.map((item) => item._id);
     const orderData = [bunId, ...ingredientIds, bunId];
 
-    dispatch(sendOrderThunk(orderData));
+    dispatch(sendOrder(orderData));
   };
 
   const closeOrderModal = () => {

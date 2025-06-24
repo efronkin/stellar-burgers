@@ -22,7 +22,7 @@ const initialState: ConstructorState = {
   isLoading: false
 };
 
-export const sendOrderThunk = createAsyncThunk(
+export const sendOrder = createAsyncThunk(
   'constructor/sendOrder',
   async (data: string[], thunkAPI) => {
     try {
@@ -73,17 +73,17 @@ const burgerConstructorSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(sendOrderThunk.pending, (state) => {
+      .addCase(sendOrder.pending, (state) => {
         state.orderRequest = true;
         state.error = null;
         state.isLoading = true;
       })
-      .addCase(sendOrderThunk.fulfilled, (state, action) => {
+      .addCase(sendOrder.fulfilled, (state, action) => {
         state.orderRequest = false;
         state.orderModalData = action.payload.order;
         state.isLoading = false;
       })
-      .addCase(sendOrderThunk.rejected, (state, action) => {
+      .addCase(sendOrder.rejected, (state, action) => {
         state.orderRequest = false;
         state.error = action.payload as string;
         state.isLoading = false;
