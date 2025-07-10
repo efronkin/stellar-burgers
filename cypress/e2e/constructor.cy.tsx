@@ -8,7 +8,7 @@ beforeEach(() => {
     }).as('getIngredients');
   });
 
-  cy.visit('http://localhost:4000');
+  cy.visit('/');
 
   cy.wait('@getIngredients');
   cy.contains('Краторная булка N-200i');
@@ -20,15 +20,15 @@ afterEach(() => {
 });
 
 describe('добавление ингредиентов в конструктор', () => {
+  const bun = '[data-testid="burger_bun"]';
+  const main = '[data-testid="burger_main"]';
+
   it('добавление булок', () => {
     cy.contains('Краторная булка N-200i')
       .closest('[data-testid="ingredient_card"]')
       .find('button')
       .click();
-    cy.get('[data-testid="burger_bun"]').should(
-      'contain',
-      'Краторная булка N-200i'
-    );
+    cy.get(bun).should('contain', 'Краторная булка N-200i');
   });
 
   it('добавление начинки', () => {
@@ -36,10 +36,7 @@ describe('добавление ингредиентов в конструкто�
       .closest('[data-testid="ingredient_card"]')
       .find('button')
       .click();
-    cy.get('[data-testid="burger_main"]').should(
-      'contain',
-      'Говяжий метеорит (отбивная)'
-    );
+    cy.get(main).should('contain', 'Говяжий метеорит (отбивная)');
   });
 
   it('добавление соуса', () => {
@@ -47,18 +44,17 @@ describe('добавление ингредиентов в конструкто�
       .closest('[data-testid="ingredient_card"]')
       .find('button')
       .click();
-    cy.get('[data-testid="burger_main"]').should(
-      'contain',
-      'Соус фирменный Space Sauce'
-    );
+    cy.get(main).should('contain', 'Соус фирменный Space Sauce');
   });
 });
 
 describe('работа модального окна', () => {
+  const ingredientModal = '[data-testid="ingredient_modal"]';
+
   it('открытие поп-апа при клике на ингредиент', () => {
     cy.contains('Краторная булка N-200i').click();
 
-    cy.get('[data-testid="ingredient_modal"]').should('be.visible');
+    cy.get(ingredientModal).should('be.visible');
   });
 
   it('закрытие поп-апа ингредиентов при клике на крестик', () => {
@@ -67,7 +63,7 @@ describe('работа модального окна', () => {
     const button = cy.get('[data-testid="close_icon"]');
 
     button.click();
-    cy.get('[data-testid="ingredient_modal"]').should('not.exist');
+    cy.get(ingredientModal).should('not.exist');
   });
 
   it('закрытие поп-апа ингредиентов при клике на оверлей', () => {
@@ -75,14 +71,16 @@ describe('работа модального окна', () => {
 
     const overlay = cy.get('[data-testid="modal_overlay"]');
 
-    cy.get('[data-testid="modal_overlay"]').should('exist');
+    overlay.should('exist');
 
     overlay.click({ force: true });
-    cy.get('[data-testid="ingredient_modal"]').should('not.exist');
+    cy.get(ingredientModal).should('not.exist');
   });
 });
 
 describe('Создание заказа', () => {
+  const orderModal = '[data-testid="order_modal"]';
+
   beforeEach(() => {
     cy.intercept('GET', '**/auth/user', {
       statusCode: 200,
@@ -100,10 +98,13 @@ describe('Создание заказа', () => {
     cy.setCookie('accessToken', 'test-token');
     window.localStorage.setItem('refreshToken', 'test-refresh-token');
 
-    cy.visit('http://localhost:4000');
+    cy.visit('/');
     cy.wait('@getUser');
 
     cy.get('[data-testid="make_order"]').as('makeOrderButton');
+    cy.get('[data-testid="burger_ingredients_list"]').as(
+      'burgerIngredientList'
+    );
   });
 
   it('кнопка создания заблокирована, если в конструктор не добавлена булка', () => {
@@ -138,32 +139,26 @@ describe('Создание заказа', () => {
 
       cy.get('@makeOrderButton').should('not.be.disabled');
       cy.get('@makeOrderButton').click();
-      cy.get('[data-testid="order_modal"]').should('be.visible');
+      cy.get(orderModal).should('be.visible');
 
       cy.get('[data-testid="close_icon"]').click();
-      cy.get('[data-testid="order_modal"]').should('not.exist');
+      cy.get(orderModal).should('not.exist');
 
-      cy.get('[data-testid="burger_ingredients_list"]').should(
+      cy.get('@burgerIngredientList').should(
         'not.contain',
         'Краторная булка N-200i'
       );
-      cy.get('[data-testid="burger_ingredients_list"]').should(
+      cy.get('@burgerIngredientList').should(
         'not.contain',
         'Говяжий метеорит (отбивная)'
       );
-      cy.get('[data-testid="burger_ingredients_list"]').should(
+      cy.get('@burgerIngredientList').should(
         'not.contain',
         'Соус фирменный Space Sauce'
       );
 
-      cy.get('[data-testid="burger_ingredients_list"]').should(
-        'contain',
-        'Выберите булки'
-      );
-      cy.get('[data-testid="burger_ingredients_list"]').should(
-        'contain',
-        'Выберите начинку'
-      );
+      cy.get('@burgerIngredientList').should('contain', 'Выберите булки');
+      cy.get('@burgerIngredientList').should('contain', 'Выберите начинку');
     });
   });
 });
